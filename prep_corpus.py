@@ -93,7 +93,7 @@ def run(cfg):
         f.write(json.dumps(rule_mappings))
 
 
-@hydra.main(config_path="conf", config_name="conf_lo_corpus")
+@hydra.main(config_path="conf", config_name="conf_ge_corpus")
 def run_prep(cfg):
     print(OmegaConf.to_yaml(cfg))
     run(cfg)

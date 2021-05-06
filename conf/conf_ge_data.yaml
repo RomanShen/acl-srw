@@ -1,0 +1,12 @@
+datadir: ../datasets/bionlp-2013-ge/BioNLP-ST-2013_GE_train_data_rev3
+datadir2: ../datasets/bionlp-2013-ge/silver_processed
+event: Gene_expression
+outdir: ../datasets/bionlp-2013-ge/ge-data
+use_silver_data: True
+rule_mappings: ../datasets/bionlp-2013-ge/silver_processed/rule_mappings.json
+dev_datadir: ../datasets/bionlp-2013-ge/BioNLP-ST-2013_GE_devel_data_rev3
+test_datadir: ../datasets/bionlp-2013-ge/BioNLP-ST-2013_GE_test_data_rev1
+
+hydra:
+  run:
+    dir: ./outputs/${now:%Y-%m-%d_%H-%M-%S}
