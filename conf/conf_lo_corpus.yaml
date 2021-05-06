@@ -1,0 +1,7 @@
+silver_data_json: ../datasets/bionlp-2013-ge/new_lo_events.json
+path_silver_processed_dir: ../datasets/bionlp-2013-ge/silver_processed
+event_type: Gene_expression
+
+hydra:
+  run:
+    dir: ./outputs/${now:%Y-%m-%d_%H-%M-%S}
