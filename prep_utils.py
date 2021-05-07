@@ -8,7 +8,6 @@
 """
 
 
-import math
 import json
 import os
 import glob
@@ -16,7 +15,6 @@ import random
 import re
 
 from nltk import sent_tokenize
-import numpy as np
 
 
 class Lang:
@@ -28,49 +26,18 @@ class Lang:
         self.labels = ["NoRel"]
         self.label2id = {"NoRel": 0}
 
-    def addSentence(self, sentence):
+    def add_sentence(self, sentence):
         for word in sentence:
-            self.addWord(word)
+            self.add_word(word)
 
-    def addWord(self, word):
+    def add_word(self, word):
         if word not in self.word2index:
             self.word2index[word] = self.n_words
             self.index2word[self.n_words] = word
             self.n_words += 1
 
 
-def load_embeddings(file, lang):
-    emb_matrix = None
-    emb_dict = dict()
-    for line in open(file):
-        if not len(line.split()) == 2:
-            if "\t" in line:
-                delimiter = "\t"
-            else:
-                delimiter = " "
-            line_split = line.rstrip().split(delimiter)
-            # extract word and vector
-            word = line_split[0]
-            vector = np.array([float(i) for i in line_split[1:]])
-            embedding_size = vector.shape[0]
-            emb_dict[word] = vector
-    print(lang.n_words)
-    for i in range(3, lang.n_words):
-        base = math.sqrt(6 / embedding_size)
-        word = lang.index2word[i]
-        try:
-            vector = emb_dict[word]
-        except KeyError:
-            vector = np.random.uniform(-base, base, embedding_size)
-        if np.any(emb_matrix):
-            emb_matrix = np.vstack((emb_matrix, vector))
-        else:
-            emb_matrix = np.random.uniform(-base, base, (4, embedding_size))
-            emb_matrix[3] = vector
-    return emb_matrix
-
-
-def sanitizeWord(w):
+def sanitize_word(w):
     if w.startswith("$T"):
         return w
     if w == ("xTHEMEx"):
@@ -280,7 +247,7 @@ def prepare_data(
                 temp_s = []
                 temp_e = []
                 for i, w in enumerate(words):
-                    sw = sanitizeWord(w)
+                    sw = sanitize_word(w)
                     if sw:
                         temp.append(sw)
                         temp_s.append(starts[i])
@@ -291,13 +258,13 @@ def prepare_data(
                     tlbl, trigger, entity, rule = res
                     if rule in rules:
                         rule = rules[rule]
-                        rule_lang.addSentence(rule)
+                        rule_lang.add_sentence(rule)
                     else:
                         rule = []
                     try:
                         temp_w = words[:]
                         trigger_pos = words.index("$" + trigger)
-                        temp_w[trigger_pos] = sanitizeWord(entities[trigger][-1])
+                        temp_w[trigger_pos] = sanitize_word(entities[trigger][-1])
                         e_pos = words.index("$" + entity)
                         temp_w[e_pos] = "xTHEMEx"
                         for i, w in enumerate(temp_w):
@@ -305,13 +272,13 @@ def prepare_data(
                                 if w[1:] not in triggers:
                                     temp_w[i] = "xOTHERx"
                                 else:
-                                    if sanitizeWord(entities[w[1:]][-1]):
-                                        temp_w[i] = sanitizeWord(entities[w[1:]][-1])
+                                    if sanitize_word(entities[w[1:]][-1]):
+                                        temp_w[i] = sanitize_word(entities[w[1:]][-1])
                                     else:
                                         temp_w[i] = entities[w[1:]][-1]
                         pos = [i - e_pos for i in range(len(words))]
-                        pos_lang.addSentence(pos)
-                        input_lang.addSentence(temp_w)
+                        pos_lang.add_sentence(pos)
+                        input_lang.add_sentence(temp_w)
                         if txt + entity not in raw_train:
                             raw_train[txt + entity] = (
                                 temp_w,
@@ -342,13 +309,13 @@ def prepare_data(
                                 if w[1:] not in triggers:
                                     temp_w[i] = "xOTHERx"
                                 else:
-                                    if sanitizeWord(entities[w[1:]][-1]):
-                                        temp_w[i] = sanitizeWord(entities[w[1:]][-1])
+                                    if sanitize_word(entities[w[1:]][-1]):
+                                        temp_w[i] = sanitize_word(entities[w[1:]][-1])
                                     else:
                                         temp_w[i] = entities[w[1:]][-1]
                         pos = [i - e_pos for i in range(len(words))]
-                        pos_lang.addSentence(pos)
-                        input_lang.addSentence(temp_w)
+                        pos_lang.add_sentence(pos)
+                        input_lang.add_sentence(temp_w)
                         raw_train[txt + entity] = (
                             temp_w,
                             entity,
@@ -361,7 +328,7 @@ def prepare_data(
                     except:
                         continue
     for i, w in input_lang.index2word.items():
-        char_lang.addSentence(w)
+        char_lang.add_sentence(w)
     if n_sample:
         sample = random.sample(list(raw_train.values()), n_sample)
         return input_lang, pos_lang, char_lang, rule_lang, train + sample
@@ -410,7 +377,7 @@ def prepare_test_data(
                 temp_s = []
                 temp_e = []
                 for i, w in enumerate(words):
-                    sw = sanitizeWord(w)
+                    sw = sanitize_word(w)
                     if sw:
                         temp.append(sw)
                         temp_s.append(starts[i])
@@ -425,13 +392,13 @@ def prepare_test_data(
                         temp_w[e_pos] = "xTHEMEx"
                         temp_w = ["xOTHERx" if "$" in w else w for w in temp_w]
                         pos = [i - e_pos for i in range(len(words))]
-                        pos_lang.addSentence(pos)
-                        input_lang.addSentence(temp_w)
+                        pos_lang.add_sentence(pos)
+                        input_lang.add_sentence(temp_w)
                         raw_test.append(
                             (temp_w, entity, e_pos, pos, starts, ends, lasteid, root)
                         )
                     except:
                         continue
     for i, w in input_lang.index2word.items():
-        char_lang.addSentence(w)
+        char_lang.add_sentence(w)
     return input_lang, pos_lang, char_lang, rule_lang, raw_test
